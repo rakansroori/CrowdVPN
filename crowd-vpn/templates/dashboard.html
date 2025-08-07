@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd VPN</title>
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Crowd VPN</h1>
+            <p class="subtitle">Secure, Private, Global</p>
+        </header>
+
+        <nav>
+            <a href="/" class="active">Connect</a>
+            <a href="/settings">Settings</a>
+            <a href="/logs">Logs</a>
+        </nav>
+
+        <main>
+            <!-- Connection Status -->
+            <div class="connection-status">
+                {% if status.connected %}
+                    <div class="status-connected">
+                        <div class="status-icon">✅</div>
+                        <h2>Connected</h2>
+                        <p>{{ status.selected_location }}</p>
+                        <div class="connection-info">
+                            <div class="info-item">
+                                <span>Speed:</span>
+                                <span>{{ status.connection_speed }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>Connected at:</span>
+                                <span>{{ status.connection_time }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span>IP Address:</span>
+                                <span>{{ status.ip_address }}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-disconnect" onclick="disconnectVPN()">🛑 Disconnect</button>
+                    </div>
+                {% else %}
+                    <div class="status-disconnected">
+                        <div class="status-icon">❌</div>
+                        <h2>Not Connected</h2>
+                        <p>Choose a location to connect</p>
+                        <button class="btn btn-connect" onclick="showLocationPicker()">🌍 Connect Now</button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Location Picker -->
+            <div id="location-picker" class="location-picker" style="display: {% if status.connected %}none{% else %}block{% endif %};">
+                <h2>Choose Your Location</h2>
+                
+                <div class="continent-tabs">
+                    {% for continent in locations.keys() %}
+                        <button class="continent-tab" onclick="showContinent('{{ continent.lower().replace(' ', '-') }}')" 
+                                {% if loop.first %}data-active="true"{% endif %}>
+                            {{ continent }}
+                        </button>
+                    {% endfor %}
+                </div>
+
+                {% for continent, countries in locations.items() %}
+                    <div class="continent-content" id="{{ continent.lower().replace(' ', '-') }}" 
+                         style="display: {% if loop.first %}block{% else %}none{% endif %};">
+                        <div class="country-grid">
+                            {% for country, cities in countries.items() %}
+                                <div class="country-card" onclick="connectToCountry('{{ country }}')">
+                                    <div class="country-flag">🌍</div>
+                                    <h3>{{ country }}</h3>
+                                    <p>{{ cities|length }} server{{ 's' if cities|length > 1 else '' }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/script.js"></script>
+    <script>
+        // Initialize WebSocket connection for real-time updates
+        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'status_update' || data.type === 'connection_update') {
+                // Reload page to update connection status
+                setTimeout(() => window.location.reload(), 500);
+            }
+        };
+        
+        function showLocationPicker() {
+            document.getElementById('location-picker').style.display = 'block';
+        }
+        
+        function showContinent(continentId) {
+            // Hide all continent contents
+            document.querySelectorAll('.continent-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active state from all tabs
+            document.querySelectorAll('.continent-tab').forEach(tab => {
+                tab.removeAttribute('data-active');
+            });
+            
+            // Show selected continent
+            document.getElementById(continentId).style.display = 'block';
+            
+            // Set active tab
+            event.target.setAttribute('data-active', 'true');
+        }
+        
+        async function connectToCountry(country) {
+            const button = event.target.closest('.country-card');
+            const originalContent = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<div class="loading"></div><h3>Connecting...</h3>';
+            button.style.pointerEvents = 'none';
+            
+            try {
+                const formData = new FormData();
+                formData.append('country', country);
+                
+                const response = await fetch('/connect', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(`Connected to ${country}!`, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showNotification(`Failed to connect: ${result.error}`, 'error');
+                    button.innerHTML = originalContent;
+                    button.style.pointerEvents = 'auto';
+                }
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+                button.innerHTML = originalContent;
+                button.style.pointerEvents = 'auto';
+            }
+        }
+        
+        async function disconnectVPN() {
+            const button = document.querySelector('.btn-disconnect');
+            const originalText = button.textContent;
+            
+            button.textContent = 'Disconnecting...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch('/disconnect', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('VPN disconnected', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showNotification(`Failed to disconnect: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+

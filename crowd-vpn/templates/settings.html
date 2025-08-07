@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd VPN Settings</title>
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Crowd VPN Settings</h1>
+        </header>
+
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/settings" class="active">Settings</a>
+            <a href="/logs">Logs</a>
+        </nav>
+
+        <main>
+            <div class="status-panel">
+                <h2>Configuration</h2>
+                <div class="form-group">
+                    <label>Current Status:</label>
+                    <p>{{ 'Running' if status.running else 'Stopped' }}</p>
+                </div>
+                <div class="form-group">
+                    <label>Node Type:</label>
+                    <p>{{ status.node_type.title() }}</p>
+                </div>
+                <div class="form-group">
+                    <label>Port:</label>
+                    <p>{{ status.port }}</p>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h2>Information</h2>
+                <p>Settings configuration will be available in future updates.</p>
+                <p>For now, you can configure the node from the Dashboard.</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
+

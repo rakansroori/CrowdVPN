@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowd VPN Logs</title>
+    <link href="/static/style.css" rel="stylesheet">
+    <style>
+        .logs-container {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #333;
+        }
+        .log-info { border-left-color: #3182ce; }
+        .log-error { border-left-color: #e53e3e; }
+        .log-warning { border-left-color: #d69e2e; }
+        .log-success { border-left-color: #38a169; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 Crowd VPN Logs</h1>
+        </header>
+
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/settings">Settings</a>
+            <a href="/logs" class="active">Logs</a>
+        </nav>
+
+        <main>
+            <div class="control-panel">
+                <h2>System Logs</h2>
+                <div class="logs-container" id="logs-container">
+                    <div class="log-entry log-info">[INFO] Crowd VPN Web Interface started</div>
+                    <div class="log-entry log-info">[INFO] Waiting for node initialization...</div>
+                    <div class="log-entry log-success">[SUCCESS] Web interface ready</div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button onclick="clearLogs()" class="btn btn-secondary">Clear Logs</button>
+                    <button onclick="refreshLogs()" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        function clearLogs() {
+            document.getElementById('logs-container').innerHTML = '';
+            showNotification('Logs cleared', 'info');
+        }
+        
+        function refreshLogs() {
+            showNotification('Logs refreshed', 'info');
+        }
+        
+        function addLogEntry(message, type = 'info') {
+            const container = document.getElementById('logs-container');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Simulate some log entries
+        setTimeout(() => addLogEntry('Node monitoring started', 'info'), 2000);
+        setTimeout(() => addLogEntry('Checking network connectivity', 'info'), 4000);
+    </script>
+</body>
+</html>
+

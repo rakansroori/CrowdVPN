@@ -1,0 +1,22 @@
+# Core networking and crypto
+aiofiles>=23.0.0
+cryptography>=41.0.0
+aiohttp>=3.8.0
+websockets>=11.0.0
+requests>=2.28.0
+
+# CLI interface
+click>=8.0.0
+
+# Data validation and system monitoring
+pydantic>=2.0.0
+psutil>=5.9.0
+
+# GUI dependencies
+ttkthemes>=3.2.2
+Pillow>=10.0.0
+
+# Geographic and network calculations
+geopy>=2.3.0
+networkx>=3.1
+

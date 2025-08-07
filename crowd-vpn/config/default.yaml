@@ -1,0 +1,72 @@
+# Default configuration for Crowd VPN
+
+# Network settings
+network:
+  listen_port: 8080
+  node_type: "hybrid"  # client, relay, exit, hybrid
+  max_connections: 50
+  connection_timeout: 30
+
+# Bootstrap nodes (initial nodes to connect to)
+bootstrap:
+  nodes:
+    - "bootstrap1.crowdvpn.example.com:8080"
+    - "bootstrap2.crowdvpn.example.com:8080"
+    - "bootstrap3.crowdvpn.example.com:8080"
+
+# Peer discovery settings
+discovery:
+  interval: 30  # seconds
+  timeout: 300  # 5 minutes
+  max_peers: 100
+  enable_local_discovery: true
+  broadcast_port: 8888
+
+# Routing configuration
+routing:
+  algorithm: "reputation_based"  # random, shortest_path, load_balanced, reputation_based
+  max_hops: 5
+  route_timeout: 300  # 5 minutes
+  load_balance_threshold: 0.8
+
+# Security settings
+security:
+  key_size: 2048
+  session_key_rotation: 3600  # 1 hour
+  enable_signature_verification: true
+  reputation_threshold: 0.3
+
+# Bandwidth settings
+bandwidth:
+  max_upload: 1024  # KB/s, 0 for unlimited
+  max_download: 2048  # KB/s, 0 for unlimited
+  fair_share: true
+  min_contribution: 128  # KB/s minimum to maintain good reputation
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "crowd_vpn.log"
+  max_file_size: 10  # MB
+  backup_count: 5
+  console_output: true
+
+# Exit node settings (only applies if node_type includes exit functionality)
+exit_node:
+  enabled: true
+  allowed_ports: [80, 443, 993, 995]  # HTTP, HTTPS, IMAPS, POP3S
+  blocked_destinations:
+    - "10.0.0.0/8"
+    - "172.16.0.0/12"
+    - "192.168.0.0/16"
+  rate_limiting:
+    connections_per_minute: 60
+    bytes_per_second: 1024000  # 1MB/s
+
+# Performance tuning
+performance:
+  worker_threads: 4
+  buffer_size: 65536  # 64KB
+  tcp_keepalive: true
+  tcp_nodelay: true
+
